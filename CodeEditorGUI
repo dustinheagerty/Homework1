@@ -1,0 +1,68 @@
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.stage.Stage;
+
+
+public class Main extends Application {
+
+    static final int SCENE_HEIGHT = 600;
+    static final int SCENE_WIDTH = 800;
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+    public void start(Stage primaryStage){
+        //making the pane
+        Pane pane = new Pane();
+        pane.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+
+        //creating normal undo and redo button
+        Button undoN = new Button("Undo");
+        Button redoN = new Button("Redo");
+
+        //creating recursive undo btn with image
+        Image undoRImage = new Image("https://cdn1.iconfinder.com/data/icons/button-glyph/64/button_2-07-512.png");
+        ImageView undoRImageView = new ImageView(undoRImage);
+        undoRImageView.setFitWidth(20);
+        undoRImageView.setFitHeight(20);
+        Button undoR = new Button("Undo Batch", undoRImageView);
+
+        //creating recursive redo btn with image
+        Image redoRImage = new Image("https://cdn0.iconfinder.com/data/icons/button-outline/64/BUTTON-06-512.png");
+        ImageView redoRImageView = new ImageView(redoRImage);
+        redoRImageView.setFitWidth(20);
+        redoRImageView.setFitHeight(20);
+        Button redoR = new Button("Redo Batch", redoRImageView);
+
+        //making hbox with btns
+        HBox hbox = new HBox(10);
+        hbox.setAlignment(Pos.TOP_LEFT);
+        hbox.setPadding(new Insets(10,20,10,20));
+        hbox.getChildren().addAll(undoN, redoN, undoR, redoR);
+
+        //layering the elements
+        StackPane root = new StackPane();
+        root.getChildren().addAll(pane, hbox);
+
+
+        //setting scene
+        Scene scene = new Scene(root, SCENE_WIDTH, SCENE_HEIGHT);
+
+        
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("Text Editor");
+        //ensure that the game screen cannot change causing the game to resize
+        primaryStage.setResizable(false);
+        primaryStage.show();
+
+    }
+
+
+}
