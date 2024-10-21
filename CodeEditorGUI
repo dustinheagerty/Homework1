@@ -142,7 +142,7 @@ public class CodeEditorGUI extends Application {
         HBox rightBox = new HBox(10);
         rightBox.setAlignment(Pos.TOP_RIGHT);
         rightBox.setPadding(new Insets(10));
-        rightBox.getChildren().addAll(undoN, redoN, undoR, redoR, open, save, exit);
+        rightBox.getChildren().addAll(undoN, redoN, undoR, redoR, checkBraces, open, save, exit);
 
 
         //making vBox with hBox and textarea
