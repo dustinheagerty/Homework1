@@ -1,23 +1,34 @@
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 
 public class CodeEditorGUI extends Application {
 
     static final int SCENE_HEIGHT = 600;
     static final int SCENE_WIDTH = 800;
+    private TextEditorState textEditorState = new TextEditorState();
+    private TextArea textArea;
 
     public static void main(String[] args) {
         launch(args);
     }
+
     public void start(Stage primaryStage){
         //making the pane
         Pane pane = new Pane();
@@ -41,28 +52,119 @@ public class CodeEditorGUI extends Application {
         redoRImageView.setFitHeight(20);
         Button redoR = new Button("Redo Batch", redoRImageView);
 
-        //making hbox with btns
-        HBox hbox = new HBox(10);
-        hbox.setAlignment(Pos.TOP_LEFT);
-        hbox.setPadding(new Insets(10,20,10,20));
-        hbox.getChildren().addAll(undoN, redoN, undoR, redoR);
+        //creating checkBraces btn
+        Button checkBraces = new Button("Check Braces");
+
+        //creating open, save, and exit btns
+        Button open  = new Button("Open");
+        Button save = new Button("Save");
+        Button exit = new Button("Exit");
+
+        //textArea
+        TextArea textArea = new TextArea();
+        textArea.setPrefHeight(500.0);
+
+        //exit button action event
+        exit.setOnAction(actionEvent -> {
+            Platform.exit();
+        });
+
+        //making save action event
+        save.setOnAction(actionEvent -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save Text File");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text Files", ".txt"));
+
+            File file = fileChooser.showSaveDialog(primaryStage);
+            if(file != null) {
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                    String textToSave = textArea.getText();
+                    writer.write(textToSave);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }//end of if statement
+        });
+
+        //making open action event
+        open.setOnAction(actionEvent -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Open Text File");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text Files", "*.txt"));
+
+            File file = fileChooser.showOpenDialog(primaryStage);
+            if(file != null){
+                try{
+                    String content = new String(java.nio.file.Files.readAllBytes(file.toPath()));
+                    textArea.setText(content);
+                }
+                catch(IOException e){
+                    e.printStackTrace();
+                }
+            }// end of if statement
+
+        });
+
+        textEditorState.save(textArea.getText());
+
+        //button event for undo
+        undoN.setOnAction(actionEvent -> {
+            String newSet = textEditorState.undoAction(textArea.getText());
+            textArea.setText(newSet);
+        });
+
+        //button event for redo
+        redoN.setOnAction(actionEvent -> {
+            String newSet = textEditorState.undoAction(textArea.getText());
+            textArea.setText(newSet);
+        });
+
+
+
+        // Capture text changes in the TextArea
+        textArea.textProperty().addListener((observable, oldValue, newValue) -> {
+            textEditorState.save(oldValue);
+        });
+
+
+        // Setting a preferred height for all buttons
+        double buttonHeight = 40;
+        undoN.setPrefHeight(buttonHeight);
+        redoN.setPrefHeight(buttonHeight);
+        undoR.setPrefHeight(buttonHeight);
+        redoR.setPrefHeight(buttonHeight);
+        checkBraces.setPrefHeight(buttonHeight);
+        open.setPrefHeight(buttonHeight);
+        save.setPrefHeight(buttonHeight);
+        exit.setPrefHeight(buttonHeight);
+
+        //making vBox with right btns
+        HBox rightBox = new HBox(10);
+        rightBox.setAlignment(Pos.TOP_RIGHT);
+        rightBox.setPadding(new Insets(10));
+        rightBox.getChildren().addAll(undoN, redoN, undoR, redoR, open, save, exit);
+
+
+        //making vBox with hBox and textarea
+        VBox vBox = new VBox(10);
+        vBox.setPadding(new Insets(10));
+        vBox.getChildren().addAll( rightBox, textArea);
+
 
         //layering the elements
         StackPane root = new StackPane();
-        root.getChildren().addAll(pane, hbox);
-
+        root.getChildren().addAll(pane, vBox);
 
         //setting scene
         Scene scene = new Scene(root, SCENE_WIDTH, SCENE_HEIGHT);
-
-        
         primaryStage.setScene(scene);
         primaryStage.setTitle("Text Editor");
         //ensure that the game screen cannot change causing the game to resize
         primaryStage.setResizable(false);
         primaryStage.show();
-
     }
-
-
 }
+
+
+
+
